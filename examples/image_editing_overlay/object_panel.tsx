@@ -79,7 +79,6 @@ export const ObjectPanel = () => {
             </Button>
           </>
         ) : (
-          <>
             <Button
               variant="primary"
               onClick={openOverlay}
@@ -88,7 +87,6 @@ export const ObjectPanel = () => {
             >
               Open Overlay
             </Button>
-          </>
         )}
       </Rows>
     </div>

@@ -5,7 +5,6 @@ import {
   Columns,
   FormField,
   MultilineInput,
-  NumberInput,
   PlusIcon,
   Rows,
   Text,
@@ -42,7 +41,7 @@ const initialState: UIState = {
       d: "M 0 0 H 100 V 100 H 0 L 0 0",
       fill: {
         dropTarget: false,
-        color: "#ff0099",
+        color: "#ffffff",
       },
     },
   ],
@@ -65,7 +64,7 @@ const appElementClient = initAppElement<AppElementData>({
 
 export const App = () => {
   const [state, setState] = useState<UIState>(initialState);
-  const { paths, viewBox, width, height, rotation } = state;
+  const { paths} = state;
   const disabled = paths.length < 1;
 
   useEffect(() => {
@@ -172,151 +171,6 @@ export const App = () => {
               </Rows>
             );
           })}
-        </Rows>
-        <Rows spacing="2u">
-          <Title size="small">Viewbox</Title>
-          <FormField
-            label="Width"
-            value={viewBox.width}
-            control={(props) => (
-              <NumberInput
-                {...props}
-                min={1}
-                onChange={(value) => {
-                  setState((prevState) => {
-                    return {
-                      ...prevState,
-                      viewBox: {
-                        ...prevState.viewBox,
-                        width: Number(value || 0),
-                      },
-                    };
-                  });
-                }}
-              />
-            )}
-          />
-          <FormField
-            label="Height"
-            value={viewBox.height}
-            control={(props) => (
-              <NumberInput
-                {...props}
-                min={1}
-                onChange={(value) => {
-                  setState((prevState) => {
-                    return {
-                      ...prevState,
-                      viewBox: {
-                        ...prevState.viewBox,
-                        height: Number(value || 0),
-                      },
-                    };
-                  });
-                }}
-              />
-            )}
-          />
-          <FormField
-            label="Top"
-            value={viewBox.top}
-            control={(props) => (
-              <NumberInput
-                {...props}
-                min={0}
-                onChange={(value) => {
-                  setState((prevState) => {
-                    return {
-                      ...prevState,
-                      viewBox: {
-                        ...prevState.viewBox,
-                        top: Number(value || 0),
-                      },
-                    };
-                  });
-                }}
-              />
-            )}
-          />
-          <FormField
-            label="Left"
-            value={viewBox.left}
-            control={(props) => (
-              <NumberInput
-                {...props}
-                min={0}
-                onChange={(value) => {
-                  setState((prevState) => {
-                    return {
-                      ...prevState,
-                      viewBox: {
-                        ...prevState.viewBox,
-                        left: Number(value || 0),
-                      },
-                    };
-                  });
-                }}
-              />
-            )}
-          />
-        </Rows>
-        <Rows spacing="2u">
-          <Title size="small">Position</Title>
-          <FormField
-            label="Width"
-            value={width}
-            control={(props) => (
-              <NumberInput
-                {...props}
-                min={1}
-                onChange={(value) => {
-                  setState((prevState) => {
-                    return {
-                      ...prevState,
-                      width: Number(value || 0),
-                    };
-                  });
-                }}
-              />
-            )}
-          />
-          <FormField
-            label="Height"
-            value={height}
-            control={(props) => (
-              <NumberInput
-                {...props}
-                min={1}
-                onChange={(value) => {
-                  setState((prevState) => {
-                    return {
-                      ...prevState,
-                      height: Number(value || 0),
-                    };
-                  });
-                }}
-              />
-            )}
-          />
-          <FormField
-            label="Rotation"
-            value={rotation}
-            control={(props) => (
-              <NumberInput
-                {...props}
-                min={-180}
-                max={180}
-                onChange={(value) => {
-                  setState((prevState) => {
-                    return {
-                      ...prevState,
-                      rotation: Number(value || 0),
-                    };
-                  });
-                }}
-              />
-            )}
-          />
         </Rows>
         <Rows spacing="1u">
           <Button
