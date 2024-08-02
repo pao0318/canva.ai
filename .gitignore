@@ -7,4 +7,4 @@ yarn-error.log
 dist
 secrets.json
 **/*/db.json
-/utils/gpt/secrets
+/utils/gpt/secrets.js
