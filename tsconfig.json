@@ -42,6 +42,7 @@
     "./src/**/*",
     "./scripts/**/*",
     "./examples/**/*",
+    "./components/**/*",
     "./declarations/declarations.d.ts",
     "./utils/**/*",
     "./styles/**/*",
