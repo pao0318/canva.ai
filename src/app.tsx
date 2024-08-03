@@ -49,24 +49,28 @@ export const App: React.FC = () => {
 
   const handleAddElement = () => {
     handleGptResponse(state.text).then(response => {
+        // Regex patterns
+        const shapeTypeRegex = /shapeType:\s*\["([^"]+)"\]/;
+        const shapeParamsRegex = /dimension:\s*\[(\d+)(?:,\s*(\d+))?\]/;
 
-        // const shapeParams: ShapeParams = {
-        //   width: 100,
-        //   height: 100,
-        //   fill: state.color,
-        // };
-        // const shapeGenerator = shapeGenerators[state.shapeType];
-        // if (shapeGenerator) {
-        //   const shapePath = shapeGenerator(shapeParams);
-        //   addNativeElement({
-        //     type: "SHAPE",
-        //     paths: [shapePath],
-        //   });
-        // }
-        console.log('shape')
-      console.log("GPT response:", response);
-    })
-  };
+        // Extract shapeType
+        const shapeTypeMatch = response.match(shapeTypeRegex);
+        const shapeType = shapeTypeMatch ? shapeTypeMatch[1] : null;
+
+        // Extract shapeParams
+        const shapeParamsMatch = response.match(shapeParamsRegex);
+        let shapeParams = {};
+
+        if (shapeParamsMatch) {
+            const width = parseInt(shapeParamsMatch[1], 10);
+            const height = shapeParamsMatch[2] ? parseInt(shapeParamsMatch[2], 10) : width;
+            shapeParams = { width, height };
+        }
+        
+        
+    });
+};
+
 
   const handleGptResponse = async(text: string) =>{
     try {

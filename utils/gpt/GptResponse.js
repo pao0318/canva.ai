@@ -3,7 +3,7 @@ import { API_KEY } from './secrets';
 async function getGPTResponse(text) {
   const systemMessage = {
     role: "system",
-    content: "Extract the shapes and only give dimension of each side based on provided prompt"
+    content: "Give response form input format in : {shapeType: [], dimension:[]} "
   };
 
   const apiMessages = [
