@@ -11,15 +11,22 @@ import {
 import { addNativeElement } from "@canva/design";
 import styles from "styles/components.css";
 import GPTResponse from "../utils/gpt/GPTResponse.js"
+import { shapeGenerators, ShapeParams } from "../utils/shapes/shapeGenerators";
+
 
 interface UIState {
   text: string;
   color: string;
+  elementType: "TEXT" | "SHAPE";
+  shapeType: string;
 }
 
 const initialState: UIState = {
   text: "Hello world",
   color: "#ff0099",
+  elementType: "TEXT",
+  shapeType: "circle",
+  
 };
 
 export const App: React.FC = () => {
@@ -32,17 +39,33 @@ export const App: React.FC = () => {
   const handleColorChange = (value: string) => {
     setState((prevState) => ({ ...prevState, color: value }));
   };
+  const handleElementTypeChange = (value: "TEXT" | "SHAPE") => {
+    setState((prevState) => ({ ...prevState, elementType: value }));
+    
+  };
+  const handleShapeTypeChange = (value: string) => {
+    setState((prevState) => ({ ...prevState, shapeType: value }));
+  };
 
   const handleAddElement = () => {
     handleGptResponse(state.text).then(response => {
-      addNativeElement({
-        type: "TEXT",
-        ...state,
-        children: [response],
-      });
-      console.log('hey',response)
-    });
-   
+
+        // const shapeParams: ShapeParams = {
+        //   width: 100,
+        //   height: 100,
+        //   fill: state.color,
+        // };
+        // const shapeGenerator = shapeGenerators[state.shapeType];
+        // if (shapeGenerator) {
+        //   const shapePath = shapeGenerator(shapeParams);
+        //   addNativeElement({
+        //     type: "SHAPE",
+        //     paths: [shapePath],
+        //   });
+        // }
+        console.log('shape')
+      console.log("GPT response:", response);
+    })
   };
 
   const handleGptResponse = async(text: string) =>{

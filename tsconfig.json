@@ -47,7 +47,9 @@
     "./utils/**/*",
     "./styles/**/*",
     "./node_modules/@types/**/*",
-    "./sdk/**/*"
+    "./sdk/**/*",
+    "./redux/**/*",
+    "./services/**/*"
   ],
   "ts-node": {
     "compilerOptions": {
