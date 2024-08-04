@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   Button,
   ColorSelector,
@@ -8,10 +7,12 @@ import {
   TextInput,
   Title,
 } from "@canva/app-ui-kit";
-import { addNativeElement } from "@canva/design";
+import React, { useState } from "react";
 import styles from "styles/components.css";
-import GPTResponse from "../utils/gpt/GPTResponse.js"
-import { shapeGenerators, ShapeParams } from "../utils/shapes/shapeGenerators";
+import { useAppDispatch } from '../redux/hooks';
+import { addOrUpdateShape } from '../redux/thunks';
+import GPTResponse from "../utils/gpt/GPTResponse.js";
+import { ShapeParams, shapeGenerators } from "../utils/shapes/shapeGenerators";
 
 
 interface UIState {
@@ -22,7 +23,7 @@ interface UIState {
 }
 
 const initialState: UIState = {
-  text: "Hello world",
+  text: "Type anything",
   color: "#ff0099",
   elementType: "TEXT",
   shapeType: "circle",
@@ -30,6 +31,7 @@ const initialState: UIState = {
 };
 
 export const App: React.FC = () => {
+  const dispatch = useAppDispatch();
   const [state, setState] = useState<UIState>(initialState);
 
   const handleTextChange = (value: string) => {
@@ -58,18 +60,39 @@ export const App: React.FC = () => {
         const shapeType = shapeTypeMatch ? shapeTypeMatch[1] : null;
 
         // Extract shapeParams
-        const shapeParamsMatch = response.match(shapeParamsRegex);
-        let shapeParams = {};
+      const shapeParamsMatch = response.match(shapeParamsRegex);
+      let shapeParams: ShapeParams = {
+        width: 100,  // default width
+        height: 100, // default height
+        fill: state.color // use the color from the state
+      };
 
-        if (shapeParamsMatch) {
-            const width = parseInt(shapeParamsMatch[1], 10);
-            const height = shapeParamsMatch[2] ? parseInt(shapeParamsMatch[2], 10) : width;
-            shapeParams = { width, height };
+      if (shapeParamsMatch) {
+        const width = parseInt(shapeParamsMatch[1], 10);
+        const height = shapeParamsMatch[2] ? parseInt(shapeParamsMatch[2], 10) : width;
+        shapeParams = { ...shapeParams, width, height };
+      }
+        // call shape generators(shapeType, shapeParams) and return shapes
+        if (shapeType && shapeType in shapeGenerators) {
+          try {
+            const shapeData = shapeGenerators[shapeType](shapeParams);
+            dispatch(addOrUpdateShape(shapeType, shapeParams));
+            console.log(`Shape generated: ${shapeType}`, shapeData);
+          } catch (error) {
+            console.error(`Error generating shape: ${shapeType}`, error);
+          }
+        } else {
+          console.error(`Invalid or unsupported shape type: ${shapeType}`);
         }
-        
-        
-    });
-};
+      }).catch(error => {
+        console.error("Error in GPT response or shape generation:", error);
+      });
+      setState(prevState => ({ ...prevState, text: "" }));
+    };
+    
+     // Select shapes (return selected shapes)
+
+     // Modify selected shaopes
 
 
   const handleGptResponse = async(text: string) =>{
