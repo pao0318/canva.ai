@@ -23,5 +23,20 @@ export type ShapeParams = {
         fill: { dropTarget: false, color: fill },
       };
     },
+    square: (params: ShapeParams) => {
+      const { width, fill } = params;
+      return {
+        d: `M 0,0 H ${width} V ${width} H 0 Z`,
+        fill: { dropTarget: false, color: fill },
+      };
+    },
+    triangle: (params: ShapeParams) => {
+      const { size, fill } = params;
+      const height = size * (Math.sqrt(3) / 2);
+      return {
+        d: `M 0,${height} L ${size / 2},0 L ${size},${height} Z`,
+        fill: { dropTarget: false, color: fill },
+      };
+    }
     // Add more shape generators here
   };

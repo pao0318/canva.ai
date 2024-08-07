@@ -51,48 +51,56 @@ export const App: React.FC = () => {
 
   const handleAddElement = () => {
     handleGptResponse(state.text).then(response => {
-        // Regex patterns
-        const shapeTypeRegex = /shapeType:\s*\["([^"]+)"\]/;
-        const shapeParamsRegex = /dimension:\s*\[(\d+)(?:,\s*(\d+))?\]/;
-
+      // Regex patterns
+      const shapeTypeRegex = /shapeType:\s(?:\["([^"]+)"\]|"([^"]+)")/;
+      const shapeParamsRegex = /dimension:\s\[(\d+)(?:,\s*(\d+))?\]/;
+  
+      // Function to extract shapeType and dimensions
+      const extractShapeInfo = response => {
         // Extract shapeType
         const shapeTypeMatch = response.match(shapeTypeRegex);
-        const shapeType = shapeTypeMatch ? shapeTypeMatch[1] : null;
-
-        // Extract shapeParams
-      const shapeParamsMatch = response.match(shapeParamsRegex);
-      let shapeParams: ShapeParams = {
+        const shapeType = shapeTypeMatch ? (shapeTypeMatch[1] || shapeTypeMatch[2]) : null;
+        // Extract dimensions
+        const dimensionMatch = response.match(shapeParamsRegex);
+        const dimensions = dimensionMatch ? dimensionMatch.slice(1).filter(Number).map(Number) : null;
+        return { shapeType, dimensions };
+      };
+      const { shapeType, dimensions } = extractShapeInfo(response);
+      // Extract shapeParams
+      let shapeParams = {
         width: 100,  // default width
         height: 100, // default height
+        size: 10,
         fill: state.color // use the color from the state
       };
-
-      if (shapeParamsMatch) {
-        const width = parseInt(shapeParamsMatch[1], 10);
-        const height = shapeParamsMatch[2] ? parseInt(shapeParamsMatch[2], 10) : width;
-        shapeParams = { ...shapeParams, width, height };
+  
+      if (dimensions) {
+        const [width, height] = dimensions;
+        shapeParams = { ...shapeParams, width, height: height || width };
       }
-        // call shape generators(shapeType, shapeParams) and return shapes
-        if (shapeType && shapeType in shapeGenerators) {
-          try {
-            const shapeData = shapeGenerators[shapeType](shapeParams);
-            dispatch(addOrUpdateShape(shapeType, shapeParams));
-            console.log(`Shape generated: ${shapeType}`, shapeData);
-          } catch (error) {
-            console.error(`Error generating shape: ${shapeType}`, error);
-          }
-        } else {
-          console.error(`Invalid or unsupported shape type: ${shapeType}`);
+  
+      // Call shape generators(shapeType, shapeParams) and return shapes
+      if (shapeType && shapeType in shapeGenerators) {
+        try {
+          const shapeData = shapeGenerators[shapeType](shapeParams);
+          dispatch(addOrUpdateShape(shapeType, shapeParams));
+          console.log(`Shape generated: ${shapeType}`, shapeData);
+        } catch (error) {
+          console.error(`Error generating shape: ${shapeType}`, error);
         }
-      }).catch(error => {
-        console.error("Error in GPT response or shape generation:", error);
-      });
-      setState(prevState => ({ ...prevState, text: "" }));
-    };
+      } else {
+        console.error(`Invalid or unsupported shape type: ${shapeType}`);
+      }
+    }).catch(error => {
+      console.error("Error in GPT response or shape generation:", error);
+    });
+    setState(prevState => ({ ...prevState, text: "" }));
+  };
+  
     
      // Select shapes (return selected shapes)
 
-     // Modify selected shaopes
+     // Modify selected shapes
 
 
   const handleGptResponse = async(text: string) =>{
