@@ -14,7 +14,6 @@ import { addOrUpdateShape } from '../redux/thunks';
 import GPTResponse from "../utils/gpt/GPTResponse.js";
 import { ShapeParams, shapeGenerators } from "../utils/shapes/shapeGenerators";
 
-
 interface UIState {
   text: string;
   color: string;
@@ -27,12 +26,12 @@ const initialState: UIState = {
   color: "#ff0099",
   elementType: "TEXT",
   shapeType: "circle",
-  
 };
 
 export const App: React.FC = () => {
   const dispatch = useAppDispatch();
   const [state, setState] = useState<UIState>(initialState);
+  const [shapeTypeState, setShapeTypeState] = useState("TEXT");
 
   const handleTextChange = (value: string) => {
     setState((prevState) => ({ ...prevState, text: value }));
@@ -41,10 +40,11 @@ export const App: React.FC = () => {
   const handleColorChange = (value: string) => {
     setState((prevState) => ({ ...prevState, color: value }));
   };
+
   const handleElementTypeChange = (value: "TEXT" | "SHAPE") => {
     setState((prevState) => ({ ...prevState, elementType: value }));
-    
   };
+
   const handleShapeTypeChange = (value: string) => {
     setState((prevState) => ({ ...prevState, shapeType: value }));
   };
@@ -54,7 +54,7 @@ export const App: React.FC = () => {
       // Regex patterns
       const shapeTypeRegex = /shapeType:\s(?:\["([^"]+)"\]|"([^"]+)")/;
       const shapeParamsRegex = /dimension:\s\[(\d+)(?:,\s*(\d+))?\]/;
-  
+
       // Function to extract shapeType and dimensions
       const extractShapeInfo = response => {
         // Extract shapeType
@@ -65,45 +65,49 @@ export const App: React.FC = () => {
         const dimensions = dimensionMatch ? dimensionMatch.slice(1).filter(Number).map(Number) : null;
         return { shapeType, dimensions };
       };
+
       const { shapeType, dimensions } = extractShapeInfo(response);
+
       // Extract shapeParams
-      let shapeParams = {
+      let shapeParams: ShapeParams = {
         width: 100,  // default width
         height: 100, // default height
         size: 10,
         fill: state.color // use the color from the state
       };
-  
+
       if (dimensions) {
         const [width, height] = dimensions;
         shapeParams = { ...shapeParams, width, height: height || width };
       }
-  
+
       // Call shape generators(shapeType, shapeParams) and return shapes
       if (shapeType && shapeType in shapeGenerators) {
         try {
           const shapeData = shapeGenerators[shapeType](shapeParams);
           dispatch(addOrUpdateShape(shapeType, shapeParams));
-          console.log(`Shape generated: ${shapeType}`, shapeData);
+          setShapeTypeState(shapeType);
+          console.log(shapeTypeState)
         } catch (error) {
           console.error(`Error generating shape: ${shapeType}`, error);
         }
       } else {
         console.error(`Invalid or unsupported shape type: ${shapeType}`);
       }
+
+      setState(prevState => ({
+        ...prevState,
+        text: "",
+        elementType: "SHAPE",
+        shapeType: shapeType || prevState.shapeType
+      }));
+      console.log(state, 'current');
     }).catch(error => {
       console.error("Error in GPT response or shape generation:", error);
     });
-    setState(prevState => ({ ...prevState, text: "" }));
   };
-  
-    
-     // Select shapes (return selected shapes)
 
-     // Modify selected shapes
-
-
-  const handleGptResponse = async(text: string) =>{
+  const handleGptResponse = async (text: string) => {
     try {
       const response = await GPTResponse(text);
       setState(prevState => ({ ...prevState, text: response }));

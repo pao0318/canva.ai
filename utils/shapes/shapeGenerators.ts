@@ -38,5 +38,4 @@ export type ShapeParams = {
         fill: { dropTarget: false, color: fill },
       };
     }
-    // Add more shape generators here
   };
