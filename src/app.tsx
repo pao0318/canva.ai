@@ -24,14 +24,14 @@ interface UIState {
 const initialState: UIState = {
   text: "Type anything",
   color: "#ff0099",
-  elementType: "TEXT",
+  elementType: "SHAPE",
   shapeType: "circle",
 };
 
 export const App: React.FC = () => {
   const dispatch = useAppDispatch();
   const [state, setState] = useState<UIState>(initialState);
-  const [shapeTypeState, setShapeTypeState] = useState("TEXT");
+  const [shapeTypeState, setShapeTypeState] = useState("SHAPE");
 
   const handleTextChange = (value: string) => {
     setState((prevState) => ({ ...prevState, text: value }));
@@ -49,74 +49,79 @@ export const App: React.FC = () => {
     setState((prevState) => ({ ...prevState, shapeType: value }));
   };
 
-  const handleAddElement = () => {
-    handleGptResponse(state.text).then(response => {
-      // Regex patterns
-      const shapeTypeRegex = /shapeType:\s(?:\["([^"]+)"\]|"([^"]+)")/;
-      const shapeParamsRegex = /dimension:\s\[(\d+)(?:,\s*(\d+))?\]/;
+  const extractShapeInfo = (response: string) => {
+    const shapeTypeRegex = /shapeType:\s(?:\["([^"]+)"\]|"([^"]+)")/;
+    const shapeParamsRegex = /dimension:\s\[(\d+)(?:,\s*(\d+))?\]/;
+  
+    const shapeTypeMatch = response.match(shapeTypeRegex);
+    const shapeType = shapeTypeMatch ? (shapeTypeMatch[1] || shapeTypeMatch[2]) : null;
+  
+    const dimensionMatch = response.match(shapeParamsRegex);
+    const dimensions = dimensionMatch ? dimensionMatch.slice(1).filter(Number).map(Number) : null;
+  
+    return { shapeType, dimensions };
+  };
 
-      // Function to extract shapeType and dimensions
-      const extractShapeInfo = response => {
-        // Extract shapeType
-        const shapeTypeMatch = response.match(shapeTypeRegex);
-        const shapeType = shapeTypeMatch ? (shapeTypeMatch[1] || shapeTypeMatch[2]) : null;
-        // Extract dimensions
-        const dimensionMatch = response.match(shapeParamsRegex);
-        const dimensions = dimensionMatch ? dimensionMatch.slice(1).filter(Number).map(Number) : null;
-        return { shapeType, dimensions };
-      };
+  const logShapeGeneration = (shapeType: string, params: ShapeParams, result: any) => {
+  console.log(`Generating ${shapeType}:`);
+  console.log('Input params:', params);
+  console.log('Output:', result);
+};
 
-      const { shapeType, dimensions } = extractShapeInfo(response);
+  const processGptResponseAndAddShape = async (text: string, color: string) => {
+  try {
+    const response = await handleGptResponse(text);
+    const { shapeType, dimensions } = extractShapeInfo(response);
 
-      // Extract shapeParams
-      let shapeParams: ShapeParams = {
-        width: 100,  // default width
-        height: 100, // default height
-        size: 10,
-        fill: state.color // use the color from the state
-      };
+    let shapeParams: ShapeParams = {
+      width: dimensions?.[0] || 0, 
+      height: dimensions?.[1] || dimensions?.[0] || 0, 
+      fill: color
+    };
 
-      if (dimensions) {
-        const [width, height] = dimensions;
-        shapeParams = { ...shapeParams, width, height: height || width };
-      }
-
-      // Call shape generators(shapeType, shapeParams) and return shapes
-      if (shapeType && shapeType in shapeGenerators) {
-        try {
-          const shapeData = shapeGenerators[shapeType](shapeParams);
-          dispatch(addOrUpdateShape(shapeType, shapeParams));
-          setShapeTypeState(shapeType);
-          console.log(shapeTypeState)
-        } catch (error) {
-          console.error(`Error generating shape: ${shapeType}`, error);
-        }
-      } else {
-        console.error(`Invalid or unsupported shape type: ${shapeType}`);
-      }
-
+    if (shapeType && shapeType in shapeGenerators) {
+      const shapeData = shapeGenerators[shapeType as keyof typeof shapeGenerators](shapeParams);
+      logShapeGeneration(shapeType, shapeParams, shapeData);
+      dispatch(addOrUpdateShape(shapeType, shapeParams));
+      return { shapeType, shapeParams };
+    } else {
+      console.error(`Invalid or unsupported shape type: ${shapeType}`);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error processing GPT response or generating shape:", error);
+    return null;
+  }
+};
+  
+  const handleAddElement = async () => {
+    const result = await processGptResponseAndAddShape(state.text, state.color);
+    if (result) {
+      const { shapeType, shapeParams } = result;
+      setShapeTypeState(shapeType);
       setState(prevState => ({
         ...prevState,
         text: "",
         elementType: "SHAPE",
         shapeType: shapeType || prevState.shapeType
       }));
-      console.log(state, 'current');
-    }).catch(error => {
-      console.error("Error in GPT response or shape generation:", error);
-    });
+    }
   };
+
 
   const handleGptResponse = async (text: string) => {
     try {
       const response = await GPTResponse(text);
+      console.log(response, 'gpt response');
       setState(prevState => ({ ...prevState, text: response }));
+      console.log(state, 'state');
       return response;
     } catch (error) {
       console.error("Error getting GPT response:", error);
       return "Error: Couldn't get a response";
     }
   };
+
 
   const isDisabled = !state.text.trim() || !state.color.trim();
 
