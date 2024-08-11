@@ -2,7 +2,7 @@
 
 MAke a secrets.js file in utils>gpt 
 
-export const API_KEY = "<Your open ai secret>"
+export const API_KEY = "Your_api-key"
 
 # Running locally
 
