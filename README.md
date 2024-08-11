@@ -1,9 +1,18 @@
 # Configuration
-MAke a secrets.js file in util>gpt directory
+
+MAke a secrets.js file in utils>gpt 
+
 export const API_KEY = "<Your open ai secret>"
+
 # Running locally
+
+```
 npm install
+```
+
+```
 npm start
+```
 
 
 
