@@ -1,3 +1,14 @@
+# Configuration
+MAke a secrets.js file in util>gpt directory
+export const API_KEY = "<Your open ai secret>"
+# Running locally
+npm install
+npm start
+
+
+
+# Rest all is the boiler plate to start from scratch
+
 # Canva Apps SDK starter kit
 
 Welcome to the **Apps SDK starter kit** for Canva's app development platform. 🎉
